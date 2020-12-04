@@ -6,29 +6,31 @@ from typing import List
 from utils import get_file_lines
 
 
-def count_trees(data: List[str], dx: int, dy: int) -> int:
+def count_trees(map_data: List[str], x_slope: int, y_slope: int) -> int:
+    if not data:
+        return 0
     result: int = 0
     x, y = 0, 0
-    row_len = None if not data else len(data[0])
-    while y < len(data):
-        if data[y][x%row_len] == '#':
+    row_len = len(map_data[0])
+    while y < len(map_data):
+        if data[y][x % row_len] == '#':
             result += 1
-        x += dx
-        y += dy
+        x += x_slope
+        y += y_slope
     return result
 
 
-def part1(data: List[str]) -> int:
-    return count_trees(data, 3, 1)
+def part1(map_data: List[str]) -> int:
+    return count_trees(map_data, 3, 1)
 
 
-def part2(data: List[str]) -> int:
+def part2(map_data: List[str]) -> int:
     return math.prod((
-        count_trees(data, 1, 1),
-        count_trees(data, 3, 1),
-        count_trees(data, 5, 1),
-        count_trees(data, 7, 1),
-        count_trees(data, 1, 2)
+        count_trees(map_data, 1, 1),
+        count_trees(map_data, 3, 1),
+        count_trees(map_data, 5, 1),
+        count_trees(map_data, 7, 1),
+        count_trees(map_data, 1, 2)
     ))
 
 

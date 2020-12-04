@@ -3,7 +3,7 @@
 import inspect
 import os
 import requests
-from typing import List
+from typing import List, Optional
 
 
 COOKIES = {'session':'53616c7465645f5f956c24443fdf0814a6393b3a8d6839acddca34c7175179eeba3c432c44be640c125d51f28e7a1e93'}
@@ -23,7 +23,7 @@ def _get_default_file_name() -> str:
     return os.path.join('input', _main_module_name() + '.txt')
 
 
-def _load_cache(filename: str) -> str:
+def _load_cache(filename: str) -> Optional[str]:
     if os.path.isfile(filename):
         with open(filename) as f:
             return f.read().rstrip()
