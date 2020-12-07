@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from collections import Counter
-from typing import NamedTuple, List
+from typing import List, NamedTuple
 
 from utils import get_file_lines
 
