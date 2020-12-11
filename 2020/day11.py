@@ -6,56 +6,44 @@ from typing import List
 from utils import get_file_lines
 
 
-def p1_get_nr_occupied_neighbours(floor_map: List[str], x: int, y:int) -> int:
-    def is_safe(x,y) -> bool:
-        return 0 <= y < len(floor_map) and 0 <= x < len(floor_map[y])
-    result: int = 0
-    positions = [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
-    for i, j in positions:
-        if is_safe(x+i, y+j) and floor_map[y+j][x+i] == '#':
-            result += 1
-    return result
+NEIGHBOUR_DIRS = ((-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1))
 
 
-def p2_get_nr_occupied_neighbours(floor_map: List[str], x: int, y:int) -> int:
-    def is_safe(x,y) -> bool:
-        return 0 <= y < len(floor_map) and 0 <= x < len(floor_map[y])
+def get_nr_occupied_neighbours(floor_map: List[str], x: int, y:int, max_depth: int) -> int:
+    row_count = len(floor_map)
+    col_count = len(floor_map[0])
     result: int = 0
-    positions = [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
-    for i, j in positions:
+    for i, j in NEIGHBOUR_DIRS:
+        neighbour_found, is_in_bounds = False, True
         depth = 1
-        while is_safe(x+i*depth, y+j*depth) and floor_map[y+j*depth][x+i*depth] == '.':
-            depth += 1
-        if is_safe(x+i*depth, y+j*depth) and floor_map[y+j*depth][x+i*depth] == '#':
+        while is_in_bounds and not neighbour_found and depth <= max_depth:
+            is_in_bounds = 0 <= (neighbour_y := y + j*depth) < row_count and \
+                           0 <= (neighbour_x := x + i*depth) < col_count
+            if is_in_bounds:
+                if floor_map[neighbour_y][neighbour_x] == '.':
+                    depth += 1
+                else:
+                    neighbour_found = True
+        if neighbour_found and floor_map[neighbour_y][neighbour_x] == '#':
             result += 1
     return result
 
 
-def p1_generate_next(floor_map: List[str]) -> List[str]:
+def generate_next(
+        floor_map: List[str],
+        max_neighbour_depth: int,
+        neighbour_threshold: int) -> List[str]:
+    def _get_nr_occupied_neighbours(x: int, y: int) -> int:
+        return get_nr_occupied_neighbours(floor_map, x, y, max_neighbour_depth)
+    def _too_many_neighbours(x: int, y: int) -> bool:
+        return _get_nr_occupied_neighbours(x, y) >= neighbour_threshold
     result: List[str] = []
     for y in range(len(floor_map)):
         new_row = ''
         for x in range(len(floor_map[0])):
-            neighbours = p1_get_nr_occupied_neighbours(floor_map, x,y)
-            if floor_map[y][x] == 'L' and neighbours == 0:
+            if floor_map[y][x] == 'L' and _get_nr_occupied_neighbours(x, y) == 0:
                 new_row += '#'
-            elif floor_map[y][x] == '#' and neighbours >= 4:
-                new_row += 'L'
-            else:
-                new_row += floor_map[y][x]
-        result.append(new_row)
-    return result
-
-
-def p2_generate_next(floor_map: List[str]) -> List[str]:
-    result: List[str] = []
-    for y in range(len(floor_map)):
-        new_row = ''
-        for x in range(len(floor_map[0])):
-            neighbours = p2_get_nr_occupied_neighbours(floor_map, x,y)
-            if floor_map[y][x] == 'L' and neighbours == 0:
-                new_row += '#'
-            elif floor_map[y][x] == '#' and neighbours >= 5:
+            elif floor_map[y][x] == '#' and _too_many_neighbours(x, y):
                 new_row += 'L'
             else:
                 new_row += floor_map[y][x]
@@ -64,23 +52,22 @@ def p2_generate_next(floor_map: List[str]) -> List[str]:
 
 
 def part1(floor_map: List[str]) -> int:
+    neighbour_depth = 1
+    neighbour_threshold = 4
     old_map = floor_map
-    while True:
-        new_map = p1_generate_next(old_map)
-        if new_map == old_map:
-            break
+    while (new_map := generate_next(old_map, neighbour_depth, neighbour_threshold)) != old_map:
         old_map = new_map
     return sum(x=='#' for x in chain.from_iterable(old_map))
 
 
 def part2(floor_map: List[str]) -> int:
+    neighbour_depth = max(len(floor_map), len(floor_map[0]))
+    neighbour_threshold = 5
     old_map = floor_map
-    while True:
-        new_map = p2_generate_next(old_map)
-        if new_map == old_map:
-            break
+    while (new_map := generate_next(old_map, neighbour_depth, neighbour_threshold)) != old_map:
         old_map = new_map
     return sum(x=='#' for x in chain.from_iterable(old_map))
+
 
 if __name__ == '__main__':
     raw_map = get_file_lines()

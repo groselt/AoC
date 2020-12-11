@@ -1,28 +1,18 @@
 #! /usr/bin/env python3
 
-from collections.abc import Iterable
-from collections import defaultdict, deque
-from typing import Callable, Deque, List
+from collections import defaultdict
+import math
+from typing import DefaultDict, List
 
 from utils import get_file_lines
 
 
-def is_valid(preamble: Deque[int], total: int) -> bool:
-    preamble_set = set(preamble)
-    for first_number in preamble_set:
-        other_number = total - first_number
-        if other_number != first_number and other_number in preamble_set:
-            return True
-    return False
-
-
 def part1(numbers: List[int]) -> int:
-    counter = defaultdict(int)
+    counter: DefaultDict[int, int] = defaultdict(int)
     last_number = 0
     for next_number in numbers:
         counter[next_number-last_number] += 1
         last_number = next_number
-    print(counter)
     return counter[1] * (counter[3] + 1)
 
 # 0   3 4 5   8
@@ -34,27 +24,30 @@ def part1(numbers: List[int]) -> int:
 # 0   3 4 5 6 7 8   11
 # 6 consec: 14?
 def part2(numbers: List[int]) -> int:
-    def combos(n: int) -> int:
-        optional_bits = n - 1
-        return 2**optional_bits - max(optional_bits-2, 0)
+    ''' When more than 2 consecutive numbers (group) present, the middle ones are redundant.
+        These middle numbers are redundant as long as we don't omit more than
+        two consecutive middle numbers
+        Number of combinations is determined by considering each middle number as a bit
+        which can be present (one) or not (zero): s**nrOfBits. Then subtract the number
+        of groups of 3 consecutive bits: nrBits-2'''
+    def are_consecutive(first: int, second: int) -> bool:
+        return second - first == 1
+    def combinations(nr_middle_bits: int) -> int:
+        return 2**nr_middle_bits - max(nr_middle_bits-2, 0)
     last_number = 0
-    runs = []
-    running = 0
+    group_combinations: List[int] = []  # nr combinations for each consecutive group
+    length = 0
     for next_number in numbers:
-        if next_number-last_number == 1:
-            running += 1
-        elif running > 0:
-            if running >= 2:
-                runs.append(combos(running))
-            running = 0
+        if are_consecutive(last_number, next_number):
+            length += 1
+        elif length > 0:
+            if length >= 2:
+                group_combinations.append(combinations(length - 1))
+            length = 0
         last_number = next_number
-    if running >= 2:
-        runs.append(combos(running))
-    print(runs)
-    tot = 1
-    for r in runs:
-        tot *= r
-    return tot
+    if length >= 2:
+        group_combinations.append(combinations(length))
+    return math.prod(group_combinations)
 
 
 if __name__ == '__main__':
