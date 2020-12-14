@@ -23,7 +23,8 @@ def to_bin(number: int, length: int = 36) -> str:
 def parse_instructions(lines: List[str]) -> List[Instruction]:
     result: List[Instruction] = []
     assign_pattern = re.compile(r'mem\[(\d+)\] = (\d+)')
-    assignments = []
+    mask: str
+    assignments: List[Assignment] = []
     for line in lines:
         if line.startswith('mask'):
             if assignments:
@@ -32,7 +33,7 @@ def parse_instructions(lines: List[str]) -> List[Instruction]:
             mask = line.split(' = ')[1]
         else:
             match = assign_pattern.match(line)
-            assignments.append(Assignment(int(match.group(1)), int(match.group(2))))
+            assignments.append(Assignment(*map(int, match.groups())))  # type: ignore
     if assignments:
         result.append(Instruction(mask, assignments))
     return result
@@ -56,7 +57,8 @@ def part1(instructions: List[Instruction]) -> int:
 
 
 def part2(instructions: List[Instruction]) -> int:
-    def all_addresses(address: int, mask: str) -> Iterable:
+    def expand_addresses(address: int, mask: str) -> Iterable:
+        ''' Generator to generate all combinations in memory efficient way '''
         float_count = mask.count('X')
         original_address = to_bin(address)
         for combination in range(2**float_count):
@@ -76,7 +78,7 @@ def part2(instructions: List[Instruction]) -> int:
     memory: Dict[int, int] = dict()  # {addr: value}
     for instruction in instructions:
         for setting in instruction.settings:
-            for address in all_addresses(setting.address, instruction.mask):
+            for address in expand_addresses(setting.address, instruction.mask):
                 memory[address] = setting.value
     return sum(memory.values())
 
