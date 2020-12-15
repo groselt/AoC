@@ -1,30 +1,19 @@
 #! /usr/bin/env python3
 
-from collections import defaultdict
-from typing import Dict, List
+from typing import List
 
 from utils import get_file_lines
 
 
 def calc_nth(data: List[int], nth: int) -> int:
-    def get_prev_pos(num: int):
-        if len(all_numbers.get(num, [])) <= 1:
-            return -1
-        return all_numbers[num][-2]
-    all_numbers: Dict[int, List[int]] = defaultdict(list)  # {num: [turn]}
-    for i, num in enumerate(data):
-        all_numbers[num] = [i+1]
-    prev = data[-1]
-    start_len = len(data)
-    for i in range(start_len, nth):
-        prev_pos = get_prev_pos(prev)
-        if prev_pos == -1:
-            new = 0
-        else:
-            new = i - prev_pos
-        all_numbers[new].append(i+1)
-        prev = new
-    return prev
+    all_numbers = { num: index + 1 for index, num in enumerate(data) }  # num: previous index
+    previous = data[-1]
+    for i in range(len(data), nth):
+        previous_index = all_numbers.get(previous, i)
+        new_number = i - previous_index
+        all_numbers[previous] = i
+        previous = new_number
+    return previous
 
 
 def part1(data: List[int]) -> int:
