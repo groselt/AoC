@@ -69,6 +69,6 @@ def part2(all_food: List[Food]) -> str:
 
 
 if __name__ == '__main__':
-    raw_food = [Food(line) for line in get_file_lines('/mnt/d/code/aoc/2020/input/day21.txt')]
+    raw_food = [Food(line) for line in get_file_lines()]
     print(part1(raw_food))  # 2020
     print(part2(raw_food))  # bcdgf,xhrdsl,vndrb,dhbxtb,lbnmsr,scxxn,bvcrrfbr,xcgtv
