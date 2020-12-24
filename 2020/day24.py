@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-from collections import defaultdict
 from typing import Dict, Iterable, List
 
 from utils import get_file_lines
@@ -17,7 +16,7 @@ DIRECTIONS = {
 
 
 def get_initial_state(all_moves: List[str]) -> Dict[complex, int]:
-    floor = defaultdict(int)  # {position: 0/1} 0=white, black=1
+    floor: Dict[complex, int] = dict()  # {position: 0/1} 0=white, black=1
     for moves in all_moves:
         position = complex()
         while moves:
@@ -25,7 +24,7 @@ def get_initial_state(all_moves: List[str]) -> Dict[complex, int]:
                 if moves.startswith(name):
                     position += change
                     moves = moves[len(name):]
-        floor[position] = (floor[position] + 1) % 2
+        floor[position] = (floor.get(position, 0) + 1) % 2
     return floor
 
 
@@ -43,17 +42,15 @@ def next_floor(floor: Dict[complex, int]) -> Dict[complex, int]:
     miny = int(min(pos.imag for pos in floor.keys()))
     maxx = int(max(pos.real for pos in floor.keys()))
     maxy = int(max(pos.imag for pos in floor.keys()))
-    new_floor = defaultdict(int)
+    new_floor: Dict[complex, int] = dict()
     for x in range(minx-2, maxx+3):
         for y in range(miny-2, maxy+3):
             position = complex(x, y)
             tile = floor.get(position, 0)
             black = count_black_neighbours(floor, position)
-            if tile == 1 and (black == 0 or black > 2):
-                new_floor[position] = 0
-            elif tile == 0 and black == 2:
+            if tile == 1 and black in (1, 2):
                 new_floor[position] = 1
-            elif tile == 1:
+            elif tile == 0 and black == 2:
                 new_floor[position] = 1
     return new_floor
 
