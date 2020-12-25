@@ -20,11 +20,8 @@ def calc_transform(pubkey: int, loop_size: int) -> int:
 
 def part1(pubkey1: int, pubkey2: int) -> int:
     loopsize1 = get_loop_size(pubkey1)
-    loopsize2 = get_loop_size(pubkey2)
-    access1 = calc_transform(pubkey2, loopsize1)
-    access2 = calc_transform(pubkey1, loopsize2)
-    assert access1 == access2
-    return access1
+    access = calc_transform(pubkey2, loopsize1)
+    return access
 
 
 if __name__ == '__main__':
