@@ -2,7 +2,6 @@
 
 import inspect
 import os
-import requests
 from typing import Any, Callable, Optional
 
 
@@ -36,6 +35,7 @@ def _save_cache(filename: str, data: str) -> None:
 
 
 def _read_from_web(filename: str) -> str:
+    import requests  # import locally as import is slow
     day_nr = int(os.path.splitext(filename)[0][-2:])
     url = f'https://adventofcode.com/2021/day/{day_nr}/input'
     #Request.add_header('Cookie', 'session=36f84923bc7144dfb56214fc3efde78b...')    
